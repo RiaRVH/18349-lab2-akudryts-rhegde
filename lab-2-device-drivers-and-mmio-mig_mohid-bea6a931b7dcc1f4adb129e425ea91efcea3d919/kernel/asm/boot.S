@@ -13,8 +13,8 @@
 .global ivt
 ivt:
 @ TODO: add the stack and the reset handler addr here.
-.word   0                   /* stack top address */
-.word   0                   /* 1 Reset */
+.word   __msp_stack_top                   /* stack top address */
+.word   _reset_                   /* 1 Reset */
 .word   _nmi_               /* 2 NMI */
 .word   _hard_fault_        /* 3 Hard Fault */
 .word   _mm_fault_          /* 4 MM Fault */
@@ -135,9 +135,32 @@ _spi1_handler:
 .thumb_func
 .global _reset_
 _reset_:
-@ Write your boot loader here!
-@ The bkpt instruction puts a breakpoint that fires an exception that
-@ can be caught if a debugger is attached.
+  ldr r0, =_data_size
+  ldr r1, =_bss_size
+  ldr r2, =_k_data
+  ldr r3, =_erodata
+  ldr r5, =_bss_start
+  mov r6, #0
+
+  flash_loop: 
+  cmp r0, #0
+  beq bss_loop
+  ldrb r4, [r3]
+  strb r4, [r2]
+  sub r0, r0, #1
+  add r3, r3, #1
+  add r2, r2, #1
+  b flash_loop
+
+  bss_loop:
+  cmp r1, #0
+  beq end
+  strb r6, [r5]
+  sub r1, r1, #1
+  add r5, r5, #1
+  b bss_loop
+
+  end:
   bl kernel_main
   bkpt
 

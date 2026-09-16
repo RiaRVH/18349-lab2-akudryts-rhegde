@@ -1,6 +1,7 @@
 #ifndef _UART_POLLING_H_
 #define _UART_POLLING_H_
 
+#define USARTDIV 0x08B
 
 void uart_polling_init (int baud);
 void uart_polling_put_byte (char c);

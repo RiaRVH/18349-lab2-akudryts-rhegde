@@ -20,6 +20,12 @@ struct uart_reg_map {
 
 /** @brief Enable  Bit for UART Config register */
 #define UART_EN (1 << 13)
+#define TX_EN (1 << 3)
+#define RX_EN (1 << 2)
+#define RCC_EN (1 << 17)
+
+#define TXE (1 << 7)
+#define RXNE (1 << 5)
 
 /**
  * @brief initializes UART to given baud rate with 8-bit word length, 1 stop bit, 0 parity bits
@@ -27,12 +33,19 @@ struct uart_reg_map {
  * @param baud Baud rate
  */
 void uart_polling_init (int baud){
-    (void) baud; /* This line is simply here to suppress the Unused Variable Error. */
-                 /* You should remove this line in your final implementation */
+    gpio_init(GPIO_A, 2, MODE_ALT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_LOW, PUPD_NONE, ALT7);
+    gpio_init(GPIO_A, 3, MODE_ALT, OUTPUT_OPEN_DRAIN, OUTPUT_SPEED_LOW, PUPD_NONE, ALT7);
 
     struct uart_reg_map *uart = UART2_BASE;
     uart->CR1 |= UART_EN;
+    uart->CR1 |= TX_EN;
+    uart->CR1 |= RX_EN;
 
+    struct rcc_reg_map *rcc = RCC_BASE;
+    rcc->apb1_enr |= RCC_EN;
+
+    //baud rate input should use macro defined in uart_polling_rate.h
+    uart->BRR |= baud;
     return;
 }
 
@@ -42,7 +55,9 @@ void uart_polling_init (int baud){
  * @param c character to be sent
  */
 void uart_polling_put_byte (char c){
-    (void) c;
+    struct uart_reg_map *uart = UART2_BASE;
+    while(!((uart->SR) & TXE)) {}
+    uart->DR |= c;
     return;
 }
 
@@ -50,5 +65,7 @@ void uart_polling_put_byte (char c){
  * @brief receives a byte over UART
  */
 char uart_polling_get_byte () {
-    return 0;
+    struct uart_reg_map *uart = UART2_BASE;
+    while(!((uart->SR) & RXNE)) {}
+    return (uart->DR & 0xFF);
 }
