@@ -39,24 +39,34 @@ int read_row(int row) {
   }
 }
 
-int read_col(int col) {
+void write_col(int col) {
   if (col == 1) {
-    return gpio_read(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
+    gpio_clr(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
+    gpio_set(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
+    gpio_set(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
   } else if (col == 2) {
-    return gpio_read(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
+    gpio_clr(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
+    gpio_set(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
+    gpio_set(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
   } else {
-    return gpio_read(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
+    gpio_clr(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
+    gpio_set(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
+    gpio_set(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
   }
 }
 
 void keypad_init() {
-    gpio_init(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
-    gpio_init(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
-    gpio_init(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
+    gpio_init(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN, MODE_GP_OUTPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
+    gpio_init(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN, MODE_GP_OUTPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
+    gpio_init(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN, MODE_GP_OUTPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
     gpio_init(KEYPAD_ROW1_PORT, KEYPAD_ROW1_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
     gpio_init(KEYPAD_ROW2_PORT, KEYPAD_ROW2_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
     gpio_init(KEYPAD_ROW3_PORT, KEYPAD_ROW3_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
     gpio_init(KEYPAD_ROW4_PORT, KEYPAD_ROW4_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
+
+    gpio_set(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
+    gpio_set(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
+    gpio_set(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
     return;
 }
 
@@ -117,18 +127,19 @@ int find_num(int col, int row) {
 }
 
 
-// returna ascii key corresponding to pressed letter
-// if no keys are pressed, return null
-// if multiple are pressed, return 1 of the pressed keys
+
+// pull a column low, check if any other row is low too, print if so. 
+// otherwise keep polling
+
 char keypad_read() {
     for (int i = 1; i < 4; i++) {
-      if (read_col(i)) {
-        for (int j = 1; j < 5; j++) {
-          if (read_row(j)) {
-            return find_num(i, j);
-          }
+      write_col(i);
+      for (int j = 1; j < 5; j++) {
+        if (!read_row(j)) {
+          return find_num(i, j);
         }
       }
     }
     return '\0';
 }
+
