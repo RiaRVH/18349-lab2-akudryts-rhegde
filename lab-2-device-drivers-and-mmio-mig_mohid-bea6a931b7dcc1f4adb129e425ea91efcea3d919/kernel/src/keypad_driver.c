@@ -12,17 +12,17 @@
 #define KEYPAD_COL3_PORT GPIO_A
 #define KEYPAD_COL3_PIN  10
 
-#define KEYPAD_ROW1_PORT GPIO_B
-#define KEYPAD_ROW1_PIN  4
+#define KEYPAD_ROW1_PORT GPIO_C
+#define KEYPAD_ROW1_PIN  2
 
-#define KEYPAD_ROW2_PORT GPIO_A
-#define KEYPAD_ROW2_PIN  3
+#define KEYPAD_ROW2_PORT GPIO_B
+#define KEYPAD_ROW2_PIN  1
 
-#define KEYPAD_ROW3_PORT GPIO_A
-#define KEYPAD_ROW3_PIN  2
+#define KEYPAD_ROW3_PORT GPIO_C
+#define KEYPAD_ROW3_PIN  1
 
-#define KEYPAD_ROW4_PORT GPIO_B
-#define KEYPAD_ROW4_PIN  3
+#define KEYPAD_ROW4_PORT GPIO_C
+#define KEYPAD_ROW4_PIN  0
 
 
 
@@ -124,16 +124,13 @@ int find_num(int col, int row) {
       break; 
     }
   }
+  return '\0';
 }
-
-
-
-// pull a column low, check if any other row is low too, print if so. 
-// otherwise keep polling
 
 char keypad_read() {
     for (int i = 1; i < 4; i++) {
       write_col(i);
+      for (int k = 0; k < 100; k++) // delay 
       for (int j = 1; j < 5; j++) {
         if (!read_row(j)) {
           return find_num(i, j);
