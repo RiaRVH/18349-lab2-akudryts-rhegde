@@ -6,9 +6,16 @@
 #include <lcd_driver.h>
 #include <keypad_driver.h>
 
-
 int kernel_main() {
-  while(1);
+  keypad_init();
+  uart_polling_init(139);
 
+
+  while(1) {
+    char x = keypad_read();
+    // char y = uart_polling_get_byte();
+    // uart_polling_put_byte(y);
+    printk("%c", x);
+  }
   return 0;
 }

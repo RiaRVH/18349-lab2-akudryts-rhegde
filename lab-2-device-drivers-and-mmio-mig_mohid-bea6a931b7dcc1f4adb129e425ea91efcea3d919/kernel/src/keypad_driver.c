@@ -130,7 +130,7 @@ int find_num(int col, int row) {
 char keypad_read() {
     for (int i = 1; i < 4; i++) {
       write_col(i);
-      for (int k = 0; k < 100; k++) // delay 
+      for (int k = 0; k < 100000; k++) // delay 
       for (int j = 1; j < 5; j++) {
         if (!read_row(j)) {
           return find_num(i, j);

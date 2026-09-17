@@ -37,15 +37,16 @@ void uart_polling_init (int baud){
     gpio_init(GPIO_A, 3, MODE_ALT, OUTPUT_OPEN_DRAIN, OUTPUT_SPEED_LOW, PUPD_NONE, ALT7);
 
     struct uart_reg_map *uart = UART2_BASE;
-    uart->CR1 |= UART_EN;
-    uart->CR1 |= TX_EN;
-    uart->CR1 |= RX_EN;
 
     struct rcc_reg_map *rcc = RCC_BASE;
     rcc->apb1_enr |= RCC_EN;
 
     //baud rate input should use macro defined in uart_polling_rate.h
     uart->BRR |= baud;
+    uart->CR1 |= UART_EN;
+    uart->CR1 |= TX_EN;
+    uart->CR1 |= RX_EN;
+
     return;
 }
 
@@ -67,5 +68,5 @@ void uart_polling_put_byte (char c){
 char uart_polling_get_byte () {
     struct uart_reg_map *uart = UART2_BASE;
     while(!((uart->SR) & RXNE)) {}
-    return (uart->DR & 0xFF);
+    return (char)(uart->DR & 0xFF);
 }
