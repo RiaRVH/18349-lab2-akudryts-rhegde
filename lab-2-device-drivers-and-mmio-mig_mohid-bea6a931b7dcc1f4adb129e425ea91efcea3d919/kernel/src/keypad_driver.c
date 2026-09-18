@@ -21,8 +21,8 @@
 #define KEYPAD_ROW3_PORT GPIO_C
 #define KEYPAD_ROW3_PIN  1
 
-#define KEYPAD_ROW4_PORT GPIO_C
-#define KEYPAD_ROW4_PIN  0
+#define KEYPAD_ROW4_PORT GPIO_B
+#define KEYPAD_ROW4_PIN  3
 
 
 
@@ -34,39 +34,40 @@ int read_row(int row) {
     return gpio_read(KEYPAD_ROW2_PORT, KEYPAD_ROW2_PIN);
   } else if (row == 3) {
     return gpio_read(KEYPAD_ROW3_PORT, KEYPAD_ROW3_PIN);
-  } else {
+  } else if (row == 4) {
     return gpio_read(KEYPAD_ROW4_PORT, KEYPAD_ROW4_PIN);
   }
+    return gpio_read(KEYPAD_ROW4_PORT, KEYPAD_ROW4_PIN);
 }
 
 void write_col(int col) {
   if (col == 1) {
-    gpio_clr(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
-    gpio_set(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
-    gpio_set(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
-  } else if (col == 2) {
+    gpio_set(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
     gpio_clr(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
-    gpio_set(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
-    gpio_set(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
-  } else {
     gpio_clr(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
-    gpio_set(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
+  } else if (col == 2) {
     gpio_set(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
+    gpio_clr(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
+    gpio_clr(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
+  } else {
+    gpio_set(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
+    gpio_clr(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
+    gpio_clr(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
   }
 }
 
 void keypad_init() {
-    gpio_init(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN, MODE_GP_OUTPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
-    gpio_init(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN, MODE_GP_OUTPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
-    gpio_init(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN, MODE_GP_OUTPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
-    gpio_init(KEYPAD_ROW1_PORT, KEYPAD_ROW1_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
-    gpio_init(KEYPAD_ROW2_PORT, KEYPAD_ROW2_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
-    gpio_init(KEYPAD_ROW3_PORT, KEYPAD_ROW3_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
-    gpio_init(KEYPAD_ROW4_PORT, KEYPAD_ROW4_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_HIGH, PUPD_PULL_UP, ALT0);
+    gpio_init(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN, MODE_GP_OUTPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_LOW, PUPD_PULL_UP, ALT0);
+    gpio_init(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN, MODE_GP_OUTPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_LOW, PUPD_PULL_UP, ALT0);
+    gpio_init(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN, MODE_GP_OUTPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_LOW, PUPD_PULL_UP, ALT0);
+    gpio_init(KEYPAD_ROW1_PORT, KEYPAD_ROW1_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_LOW, PUPD_PULL_DOWN, ALT0);
+    gpio_init(KEYPAD_ROW2_PORT, KEYPAD_ROW2_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_LOW, PUPD_PULL_DOWN, ALT0);
+    gpio_init(KEYPAD_ROW3_PORT, KEYPAD_ROW3_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_LOW, PUPD_PULL_DOWN, ALT0);
+    gpio_init(KEYPAD_ROW4_PORT, KEYPAD_ROW4_PIN, MODE_INPUT, OUTPUT_PUSH_PULL, OUTPUT_SPEED_LOW, PUPD_PULL_DOWN, ALT0);
 
-    gpio_set(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
-    gpio_set(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
-    gpio_set(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
+    gpio_clr(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN);
+    gpio_clr(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN);
+    gpio_clr(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN);
     return;
 }
 
@@ -104,8 +105,8 @@ int find_num(int col, int row) {
             return '0';
             break;
         }
-      break;
       }
+    break;
     default: {
       switch (row) {
           case 1:
@@ -121,18 +122,17 @@ int find_num(int col, int row) {
             return '#';
             break;
         }
-      break; 
     }
+    break;
   }
   return '\0';
 }
 
 char keypad_read() {
-    for (int i = 1; i < 4; i++) {
+    for (int i = 1; i <= 3; i++) {
       write_col(i);
-      for (int k = 0; k < 100000; k++) // delay 
-      for (int j = 1; j < 5; j++) {
-        if (!read_row(j)) {
+      for (int j = 1; j <= 4; j++) {
+        if (read_row(j)) {
           return find_num(i, j);
         }
       }

@@ -13,9 +13,10 @@ int kernel_main() {
 
   while(1) {
     char x = keypad_read();
+    printk("%c", x);
+    for (int k = 0; k < 101000; k++) ;
     // char y = uart_polling_get_byte();
     // uart_polling_put_byte(y);
-    printk("%c", x);
   }
   return 0;
 }
